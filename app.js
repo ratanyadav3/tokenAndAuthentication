@@ -8,12 +8,40 @@ import bcrypt from 'bcrypt'
 import { User } from './models/user.js';
 import { Post } from './models/post.js';
 import cookieParser from 'cookie-parser';
+import upload from './config/muterconfig.js'
+import path from 'path';
+import { fileURLToPath } from 'url'; // Import required to simulate __dirname in ES modules
+
+// Simulate __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+
 
 app.use(express.json());
 app.use(urlencoded({extended:true}));
 app.use(cookieParser());
-
+app.use(express.static(path.join(__dirname, "public")));
 app.set('view engine','ejs');
+
+
+
+
+app.get('/profile/upload',(req,res)=>{
+    res.render('profilepic');
+})
+
+app.post('/upload',isLoggedIn,upload.single('image'),async(req,res)=>{
+    console.log(req.file);
+    // //  const user = await User.findOne({email:req.user.email})
+    // //  user.profilepic = user.file.filename;
+
+    //  await user.save();
+
+    //  res.redirect('/profile');
+
+})
 
 
 app.get('/',(req,res)=>{
