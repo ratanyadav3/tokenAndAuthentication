@@ -16,6 +16,7 @@ const storage = multer.diskStorage({
       }
       // Create the filename with a random hex string and the original file extension
       const fn = buffer.toString('hex') + path.extname(file.originalname);
+      
       cb(null, fn);
     });
   }

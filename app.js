@@ -33,13 +33,12 @@ app.get('/profile/upload',(req,res)=>{
 })
 
 app.post('/upload',isLoggedIn,upload.single('image'),async(req,res)=>{
-    console.log(req.file);
-    // //  const user = await User.findOne({email:req.user.email})
-    // //  user.profilepic = user.file.filename;
+     const user = await User.findOne({email:req.user.email})
+     user.profilepic = req.file.filename;
 
-    //  await user.save();
+     await user.save();
 
-    //  res.redirect('/profile');
+     res.redirect('/profile');
 
 })
 
@@ -85,7 +84,7 @@ app.get('/login',(req,res)=>{
 app.post('/login',async(req,res)=>{
     const {email , password} = req.body;
     const regUser = await User.findOne({email});
-    if(!regUser) return res.status(500).send("create Account first").redirect('/');
+    if(!regUser) return res.status(500).redirect('/');
 
     bcrypt.compare(password,regUser.password,(err,result)=>{
         if(result)
@@ -121,16 +120,27 @@ app.get('/edit/:id',isLoggedIn,async(req,res)=>{
     res.render('edit',{post});
 })
 
-app.post('/update/:id',isLoggedIn,async(req,res)=>{
-    console.log(req.body.content);
-    const post = await Post.findOneAndUpdate(
-        { _id: req.params.id }, 
-        { content: req.body.content },
-        { new: true }  // This ensures the updated document is returned
-    );
-    
-    res.redirect('/profile');
-})
+app.post('/update/:id', isLoggedIn, async (req, res) => {
+    try {
+        // Find the post by ID and update the content
+        const post = await Post.findOneAndUpdate(
+            { _id: req.params.id }, 
+            { content: req.body.content },
+            { new: true }  // Returns the updated document
+        );
+
+        if (!post) {
+            return res.status(404).send('Post not found');
+        }
+
+        // Redirect to the profile page after successful update
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Error updating post:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 app.post('/post',isLoggedIn,async(req,res)=>{
     const user = await User.findById(req.user.userId);
